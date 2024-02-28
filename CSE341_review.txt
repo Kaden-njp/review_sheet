@@ -1,0 +1,85 @@
+CSE341:
+Lecture 1: syllabus
+Lecture 2: No content
+Lecture 3: general reading (about machine and mips) NO CODE INCLUDING
+
+
+===Lecture 4===
+
+1. y := 3x+17-z
+	it mean we have x, y, and z, eventually we need to return y, so base on y
+	first - we cant times x by 3, but we can add 3 times - load x
+	y := x + x
+	y := y + x
+	y := y + 17
+	load z
+	y := y - z
+	
+2. int running_sum(int pressure[])
+{
+		int i , sum = 0;
+		
+		for (i = 0; i < 10; i++)
+		{
+			sum = pressure[i] + sum;
+		}
+		return sum;
+}
+
+so how do I convert to mips assembly language?
+
+# first we setup i and sum, i for index
+addi $t0, $0, 9		# bacause the for loop is i < 10, so we set up t0 to represent i/index
+
+#second we set up the v0 for storing the sum
+add	$v0, $v0, $0 	# it might seen redundant but it clarify you can use it or use it as NOP action
+
+# load element into t1
+lbu $t1, ($a0)
+
+addi $a0, $a0, i 	# addi because add with constant and a0 + 1 means moving pointer
+add $v0, $v0, $t0	#t0 was the element that loaded out, we add it to sum
+
+addi $t0, $t0, -1	# after process t0 decrease 1
+bne $t0, $0, -16	# if not 0, back to loop again
+
+jr $ra				#		exit the program
+add $0, $0, $0 		# 		NOP
+
+
+~~~NOTE~~~
+lb and lbu: they all load data to 32 bits, but lets say you want to read byte 0xFF (lb $destination, $address)
+lb: sign extend it to 0xFFFFFFFF which is -1
+lbu: 0 extend it to 0x000000FF which is 255
+
+sb: store byte from address to destination (sb $address, $destination)
+add: add values in two register
+addi: add a value in a register to a constant
+sub: subtract one register value from another
+sll: logical left shift a register value a constant number of places to the left 
+	add $s0, $zero, 4 # it mean s0 is 4
+	sll $t0, $s0, 2	  # 2 is a exponent, t0 is 16 because 4 * 2^(2)
+BEQ: branch on equal, if equal, go to a specific instruction
+~~~NOTE~~~
+
+===Lecture 5: Talk the same thing as lecture 4===second code file including
+
+.globl main
+.globl done
+.data
+x:	.byte 4
+y:	.byte 200
+.text
+main:	# y := 65 * x - y + 39
+	lb $t0, x		# Load x into t0
+	sll $t1, $t0, 6		# 64 * x
+	add $t1, $t1, $t0	# 65 * x
+	lb $t3, y		# Load y into t3
+	sub $t1, $t1, $t3	# 65 * x - y
+	addi $t1, $t1, 39	# 65 * x - y + 39
+	sb $t1, y		# Store t3 into y
+done:	or $0, $0, $0		# Set breakpoint here to check values
+
+~~~NOTE~~~
+sll $t1, $t0, 6 # 6 mean 2^6 which is 64, t0 is x, so x times 64
+add $t1, $t1, $t0 # again because we want 65 time t0, so times again, result store in t1 too
